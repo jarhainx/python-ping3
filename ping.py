@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-
 """
-    A pure python ping implementation using raw socket.
+    A pure python3 ping implementation using raw socket.
 
 
     Note that ICMP messages can only be sent from processes running as root.
@@ -31,6 +30,9 @@
 
     Fork by Pierre Bourdon:
       -> http://bitbucket.org/delroth/python-ping/
+
+    Fork by Jean Arhainx:
+      -> https://github.com/jarhainx/python-ping3.git
 
     Revision history
     ~~~~~~~~~~~~~~~~
@@ -88,7 +90,7 @@
 
 """
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 import os
 import select
@@ -108,8 +110,8 @@ def checksum(source_string):
     """
     sum = 0
     count_to = (len(source_string) / 2) * 2
-    for count in xrange(0, count_to, 2):
-        this = ord(source_string[count + 1]) * 256 + ord(source_string[count])
+    for count in range(0, int(count_to), 2):
+        this = source_string[count + 1] * 256 + source_string[count]
         sum = sum + this
         sum = sum & 0xffffffff # Necessary?
 
@@ -160,7 +162,7 @@ def send_one_ping(my_socket, dest_addr, id, psize):
     """
     Send one ping to the given >dest_addr<.
     """
-    dest_addr  =  socket.gethostbyname(dest_addr)
+    dest_addr = socket.gethostbyname(dest_addr)
 
     # Remove header size from packet size
     psize = psize - 8
@@ -168,10 +170,11 @@ def send_one_ping(my_socket, dest_addr, id, psize):
     # Header is type (8), code (8), checksum (16), id (16), sequence (16)
     my_checksum = 0
 
-    # Make a dummy heder with a 0 checksum.
+    # Make a dummy header with a 0 checksum.
     header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, my_checksum, id, 1)
     bytes = struct.calcsize("d")
-    data = (psize - bytes) * "Q"
+    datas = (psize - bytes) * "Q"
+    data = bytearray(datas.encode('utf-8'))
     data = struct.pack("d", time.time()) + data
 
     # Calculate the checksum on the data and the dummy header.
@@ -186,26 +189,25 @@ def send_one_ping(my_socket, dest_addr, id, psize):
     my_socket.sendto(packet, (dest_addr, 1)) # Don't know about the 1
 
 
-def do_one(dest_addr, timeout, psize):
+def do_one(dest_addr, timeout=2, psize=64):
     """
     Returns either the delay (in seconds) or none on timeout.
     """
-    icmp = socket.getprotobyname("icmp")
+    icmp = socket.getprotobyname('icmp')
     try:
         my_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
-    except socket.error, (errno, msg):
-        if errno == 1:
-            # Operation not permitted
-            msg = msg + (
-                " - Note that ICMP messages can only be sent from processes"
-                " running as root."
-            )
-            raise socket.error(msg)
-        raise # raise the original error
+    except socket.error as e:
+        if e.errno == 1:
+            print("Note that ICMP messages can only be sent from processes running as root.")
+        print ('Connection fail ' ,e)
+        return None
 
     my_id = os.getpid() & 0xFFFF
+    try:
+        send_one_ping(my_socket, dest_addr, my_id, psize)
+    except:
+        return None
 
-    send_one_ping(my_socket, dest_addr, my_id, psize)
     delay = receive_one_ping(my_socket, my_id, timeout)
 
     my_socket.close()
@@ -217,20 +219,20 @@ def verbose_ping(dest_addr, timeout = 2, count = 4, psize = 64):
     Send `count' ping with `psize' size to `dest_addr' with
     the given `timeout' and display the result.
     """
-    for i in xrange(count):
-        print "ping %s with ..." % dest_addr,
+    for i in range(count):
+        print("ping %s with ..." % dest_addr)
         try:
             delay  =  do_one(dest_addr, timeout, psize)
-        except socket.gaierror, e:
-            print "failed. (socket error: '%s')" % e[1]
+        except socket.gaierror as e:
+            print("failed. (socket error: '%s')" % e[1])
             break
 
-        if delay  ==  None:
-            print "failed. (timeout within %ssec.)" % timeout
+        if delay  is  None:
+            print("failed. (timeout within %ssec.)" % timeout)
         else:
             delay  =  delay * 1000
-            print "get ping in %0.4fms" % delay
-    print
+            print("get ping in %0.4fms" % delay)
+    print(" ")
 
 
 def quiet_ping(dest_addr, timeout = 2, count = 4, psize = 64):
@@ -245,14 +247,14 @@ def quiet_ping(dest_addr, timeout = 2, count = 4, psize = 64):
     lost = 0
     plist = []
 
-    for i in xrange(count):
+    for i in range(count):
         try:
             delay = do_one(dest_addr, timeout, psize)
-        except socket.gaierror, e:
-            print "failed. (socket error: '%s')" % e[1]
+        except socket.gaierror as e:
+            print("failed. (socket error: '%s')" % e[1])
             break
 
-        if delay != None:
+        if delay is not  None:
             delay = delay * 1000
             plist.append(delay)
 
@@ -267,7 +269,7 @@ def quiet_ping(dest_addr, timeout = 2, count = 4, psize = 64):
     return percent_lost, mrtt, artt
 
 if __name__ == '__main__':
-    verbose_ping("heise.de")
-    verbose_ping("google.com")
-    verbose_ping("a-test-url-taht-is-not-available.com")
-    verbose_ping("192.168.1.1")
+    verbose_ping("www.free.fr", timeout=2, count=1, psize=10)
+    verbose_ping("www.free.fr", timeout=2, count=1, psize=1000)
+    print(quiet_ping(("www.free.fr")))
+    print(do_one("www.frhhee.fr"))
