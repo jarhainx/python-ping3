@@ -30,7 +30,7 @@ setup(
     ],
 
     author="Jean Arhainx",
-    author_email="delroth@gmail.com",
+    author_email="arhainx@gmail.com",
     description="An implementation of ICMP ping in Python3",
     long_description=open('README').read(),
     license="GPL2",
