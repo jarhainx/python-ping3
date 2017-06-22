@@ -4,7 +4,7 @@
 setup.py
 Distutils setup script.
 
-Copyright (c) 2010 Pierre Bourdon <delroth@gmail.com>
+Copyright (c) 2017 Jean Arhainx 
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 2 as
@@ -23,20 +23,20 @@ from distutils.core import setup
 from ping import __version__
 
 setup(
-    name="ping",
+    name="ping3",
     version=__version__,
     py_modules=[
-        'ping'
+        'ping3'
     ],
 
-    author="Pierre Bourdon",
+    author="Jean Arhainx",
     author_email="delroth@gmail.com",
-    description="An implementation of ICMP ping in Python",
+    description="An implementation of ICMP ping in Python3",
     long_description=open('README').read(),
     license="GPL2",
     keywords="ping icmp network latency",
-    url="http://bitbucket.org/delroth/python-ping/",
-    download_url="http://bitbucket.org/delroth/python-ping/downloads/python-ping-%s.tar.gz" % __version__,
+    url="https://github.com/jarhainx/python-ping3.git",
+    download_url="https://codeload.github.com/jarhainx/python-ping3/zip/master" % __version__,
 
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -45,7 +45,7 @@ setup(
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: Unix",
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Topic :: Internet",
         "Topic :: System :: Networking",
         "Topic :: System :: Networking :: Monitoring",
