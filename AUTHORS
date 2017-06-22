@@ -1,7 +1,7 @@
-This library is a fork of the python-ping library created by George Notaras
-and released under the GNU GPLv2 license and a fork  created by Pierre Bourdon .
+This library is a fork of the python-ping library created by George Notaras and forked by Pierre Bourdon
+and released under the GNU GPLv2 license.
 
-This fork is created by Jean Arhainx
+This fork is created by Jean Arhainx (python3)
 
 Contributors:
  - Georgi Kolev contributed a way to specify the packet size and a quiet ping
